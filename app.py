@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_mysqldb import MySQL
+from flask_mail import Mail, Message
+from flask_sqlalchemy import SQLAlchemy
 import config
 import MySQLdb.cursors
 
@@ -8,6 +10,8 @@ app = Flask(__name__)
 # MySQL configuration
 app.config.from_object(config.Config)
 mysql = MySQL(app)
+
+# Flask-Mail setup (assuming you're using Flask-Mail for email sending)
 
 
 @app.route('/')
@@ -213,6 +217,144 @@ def view_security_incidents():
     return render_template('view_security_incidents.html', incidents=incidents,
                            iid=iid, eid=eid, severity=severity, reporter=reporter,
                            report_date=report_date, description=description, resolve_date=resolve_date)
+
+@app.route('/maintenance_contracts', methods=['GET', 'POST'])
+def maintenance_contracts():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    # Get filter parameters from request
+    cid = request.args.get('cid', '').strip()
+    vid = request.args.get('vid', '').strip()
+    vendor_name = request.args.get('vendor_name', '').strip()
+    eid = request.args.get('eid', '').strip()
+    equipment_name = request.args.get('equipment_name', '').strip()
+    service_level = request.args.get('service_level', '').strip()
+    equipment_type = request.args.get('equipment_type', '').strip()
+    start_date = request.args.get('starrt_date', '').strip()
+    end_date = request.args.get('end_date', '').strip()
+
+    query = '''
+        SELECT 
+            MaintenanceContract.CID, 
+            MaintenanceContract.start_date, 
+            MaintenanceContract.end_date, 
+            MaintenanceContract.service_level, 
+            MaintenanceContract.EID, 
+            MaintenanceContract.VID,
+            Equipment.name AS equipment_name, 
+            Equipment.type AS equipment_type, 
+            Vendor.name AS vendor_name, 
+            Vendor.contact_person AS vendor_contact
+        FROM 
+            MaintenanceContract
+        JOIN 
+            Equipment ON MaintenanceContract.EID = Equipment.EID
+        JOIN 
+            Vendor ON MaintenanceContract.VID = Vendor.VID
+        WHERE 1=1
+    '''
+    params = []
+
+    # Apply filters if they exist
+    if cid:
+        query += " AND MaintenanceContract.CID = %s"
+        params.append(cid)
+    if vid:
+        query += " AND MaintenanceContract.VID = %s"
+        params.append(vid)
+    if vendor_name:
+        query += " AND MaintenanceContract.vendor_name = %s"
+        params.append(f"%{vendor_name}%")
+    if eid:
+        query += " AND MaintenanceContract.EID = %s"
+        params.append(eid)
+    if equipment_name:
+        query += " AND MaintenanceContract.equipment_name = %s"
+        params.append(f"%{equipment_name}%")
+    if service_level:
+        query += " AND MaintenanceContract.service_level LIKE %s"
+        params.append(f"%{service_level}%")
+    if equipment_type:
+        query += " AND Equipment.type LIKE %s"
+        params.append(f"%{equipment_type}%")
+    if start_date:
+        query += " AND MaintenanceContract.start_date = %s"
+        params.append(start_date)
+    if end_date:
+        query += " AND MaintenanceContract.end_date = %s"
+        params.append(end_date)
+
+    cursor.execute(query, tuple(params))
+    maintenance_contracts = cursor.fetchall()
+
+    return render_template('maintenance_contracts.html', maintenance_contracts=maintenance_contracts)
+
+# Add Maintenance Contract
+@app.route('/add_maintenance_contract', methods=['GET', 'POST'])
+def add_maintenance_contract():
+    if request.method == 'POST':
+        eid = request.form['eid']
+        vid = request.form['vid']
+        service_level = request.form['service_level']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('''
+            INSERT INTO MaintenanceContract (EID, VID, service_level, start_date, end_date)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (eid, vid, service_level, start_date, end_date))
+        mysql.connection.commit()
+        return redirect(url_for('maintenance_contracts'))
+    
+    # Fetch equipment and vendor data for dropdowns in the form
+    '''cursor.execute("SELECT * FROM Equipment")
+    equipment = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Vendor")
+    vendors = cursor.fetchall()'''
+
+    return render_template('add_maintenance_contract.html')
+
+
+# Edit Maintenance Contract
+@app.route('/edit_maintenance_contract/<int:cid>', methods=['GET', 'POST'])
+def edit_maintenance_contract(cid):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    if request.method == 'POST':
+        eid = request.form['eid']
+        vid = request.form['vid']
+        service_level = request.form['service_level']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        
+        cursor.execute('''
+            UPDATE MaintenanceContract SET EID=%s, VID=%s, service_level=%s, start_date=%s, end_date=%s
+            WHERE CID=%s
+        ''', (eid, vid, service_level, start_date, end_date, cid))
+        mysql.connection.commit()
+        return redirect(url_for('maintenance_contracts'))
+
+    cursor.execute('SELECT * FROM MaintenanceContract WHERE CID=%s', (cid,))
+    contract = cursor.fetchone()
+
+    # Fetch equipment and vendor data for dropdowns in the form
+    cursor.execute("SELECT * FROM Equipment")
+    equipment = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM Vendor")
+    vendors = cursor.fetchall()
+
+    return render_template('edit_maintenance_contract.html', contract=contract, equipment=equipment, vendors=vendors)
+@app.route('/delete_maintenance_contract/<int:cid>', methods=['POST'])
+def delete_maintenance_contract(cid):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('DELETE FROM MaintenanceContract WHERE CID=%s', (cid,))
+    mysql.connection.commit()
+    return redirect(url_for('maintenance_contracts'))
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

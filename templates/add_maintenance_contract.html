@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Maintenance Contract</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 60%;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3f51b5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Maintenance Contract</h1>
+    <form action="{{ url_for('add_maintenance_contract') }}" method="POST">
+        <label for="cid">Contract ID:</label>
+        <input type="text" name="cid" required><br><br>
+
+        <label for="vid">Vendor ID:</label>
+        <input type="text" name="vid" required><br><br>
+
+        <label for="vendor_name">Vendor Name:</label>
+        <input type="text" name="vendor_name" required><br><br>
+
+        <label for="eid">Equipment ID:</label>
+        <input type="text" name="eid" required><br><br>
+
+        <label for="equipment_name">Equipment Name:</label>
+        <input type="text" name="equipment_name" required><br><br>
+
+        <label for="service_level">Service Level:</label>
+        <input type="text" name="service_level" required><br><br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" name="start_date" required><br><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" name="end_date" required><br><br>
+
+        <button type="submit">Add Contract</button>
+    </form>
+</body>
+</html>

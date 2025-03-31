@@ -163,11 +163,17 @@
                 {% endfor %}
             </tbody>
         </table>
+        <a href="{{ url_for('send_due_date_email', cid=contract.CID) }}" class="btn btn-info btn-sm">Send Due Date Email</a>
+
+        <!-- Display success message -->
+        {% if message %}
+        <div class="alert alert-success mt-3">{{ message }}</div>
+        {% endif %}
 
         <!-- Back Buttons -->
         <div class="back-buttons">
             <a href="{{ url_for('index') }}" class="btn btn-secondary btn-custom">Back to Home</a>
-            <a href="{{ url_for('manage_equipment') }}" class="btn btn-secondary btn-custom">Back to List</a>
+            <a href="{{ url_for('manage_equipment') }}" class="btn btn-secondary btn-custom">Reset Filters</a>
         </div>
 
     </div>
