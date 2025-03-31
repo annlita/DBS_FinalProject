@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Equipment</title>
+</head>
+<body>
+
+<h1>Delete Equipment</h1>
+
+<p>Are you sure you want to delete the following equipment?</p>
+
+<p>Name: {{ equipment.name }}</p>
+<p>Type: {{ equipment.type }}</p>
+
+<form method="POST">
+    <button type="submit">Delete Equipment</button>
+</form>
+
+</body>
+</html>

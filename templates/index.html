@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Management</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="my-4">Equipment Management System</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <a href="{{ url_for('view_equipment') }}" class="btn btn-primary btn-lg">View Equipment</a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('manage_equipment') }}" class="btn btn-success btn-lg">Manage Equipment</a>
+            </div>
+            <div class="col-md-4">
+                <a href="{{ url_for('view_security_incidents') }}" class="btn btn-warning btn-lg">Security Incidents</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

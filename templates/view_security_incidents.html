@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Incidents</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="text-center my-4">Security Incidents</h1>
+
+    <!-- Filter Form -->
+    <form method="GET" class="mb-4">
+        <div class="row">
+            <div class="col-md-2">
+                <input type="text" name="iid" class="form-control" placeholder="Incident ID" value="{{ iid }}">
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="eid" class="form-control" placeholder="Equipment ID" value="{{ eid }}">
+            </div>
+            <div class="col-md-2">
+                <select name="severity" class="form-control">
+                    <option value="">Select Severity</option>
+                    <option value="Low" {% if severity == 'Low' %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if severity == 'Medium' %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if severity == 'High' %}selected{% endif %}>High</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="reporter" class="form-control" placeholder="Reporter" value="{{ reporter }}">
+            </div>
+            <div class="col-md-2">
+                <input type="date" name="report_date" class="form-control" value="{{ report_date }}">
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="description" class="form-control" placeholder="Description" value="{{ description }}">
+            </div>
+            <div class="col-md-2">
+                <select name="resolve_date" class="form-control">
+                    <option value="">Select Resolve Date</option>
+                    <option value="Pending" {% if resolve_date == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Resolved" {% if resolve_date != 'Pending' and resolve_date != '' %}selected{% endif %}>Resolved</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary btn-block">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Incidents Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Incident ID</th>
+                <th>Equipment ID</th>
+                <th>Description</th>
+                <th>Severity</th>
+                <th>Reporter</th>
+                <th>Report Date</th>
+                <th>Resolve Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for incident in incidents %}
+            <tr>
+                <td>{{ incident.IID }}</td>
+                <td>{{ incident.EID }}</td>
+                <td>{{ incident.description }}</td>
+                <td>{{ incident.severity }}</td>                    
+                <td>{{ incident.reporter }}</td>
+                <td>{{ incident.report_date }}</td>
+                <td>{{ incident.resolve_date if incident.resolve_date else 'Pending' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No security incidents found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Buttons -->
+    <div class="mt-3 d-flex justify-content-between">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Home</a>
+        <a href="{{ url_for('view_security_incidents') }}" class="btn btn-info">Reset Filters</a>
+    </div>
+</div>
+
+</body>
+</html>
