@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 import MySQLdb.cursors
@@ -11,6 +13,9 @@ import pymysql
 from config import Config  # Import config settings
 
 app = Flask(__name__)
+app.secret_key = 'abccompanyDB'
+
+bcrypt = Bcrypt(app)
 
 # Load MySQL settings from config.py
 app.config['MYSQL_HOST'] = Config.MYSQL_HOST
@@ -22,17 +27,71 @@ app.config['MYSQL_CONNECT_TIMEOUT'] = 20
 
 
 mysql = MySQL(app)
-#cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 # Flask-Mail setup (assuming you're using Flask-Mail for email sending)
 
+# User Model for Flask-Login
+class User(UserMixin):
+    def __init__(self, uid, email, role):
+        self.id = uid
+        self.email = email
+        self.role = role
+
+# Load user function for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+        cursor.execute("SELECT * FROM user WHERE UID = %s", (user_id,))
+        user = cursor.fetchone()
+        if user:
+            return User(user["UID"], user["email"], user["role"])
+    return None
+
+# ---------------- AUTHENTICATION ROUTES ----------------
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            cursor.execute("SELECT * FROM user WHERE email = %s", (email,))
+            user = cursor.fetchone()
+
+            if user and bcrypt.check_password_hash(user['password'], password):
+                login_user(User(user['UID'], user['email'], user['role']))
+                flash('Login successful!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Invalid email or password', 'danger')
+
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Logged out successfully', 'success')
+    return redirect(url_for('login'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html', user=current_user)
 
 @app.route('/')
+@login_required
 def index():
     return render_template('index.html')  # Render the first page from index.html
 
 # Manage Equipment - List all equipment with filters
 @app.route('/manage_equipment', methods=['GET', 'POST'])
+@login_required
 def manage_equipment():
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
 
@@ -89,6 +148,7 @@ def manage_equipment():
 
 # Add Equipment
 @app.route('/add_equipment', methods=['GET', 'POST'])
+@login_required
 def add_equipment():
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         if request.method == 'POST':
@@ -112,6 +172,7 @@ def add_equipment():
 
 # Edit Equipment
 @app.route('/edit_equipment/<int:eid>', methods=['GET', 'POST'])
+@login_required
 def edit_equipment(eid):
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         
@@ -138,6 +199,7 @@ def edit_equipment(eid):
 
 # View Equipment with Filters
 @app.route('/view_equipment', methods=['GET'])
+@login_required
 def view_equipment():
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         
@@ -186,6 +248,7 @@ def view_equipment():
                            status=status, purchase_date=purchase_date, warranty_end_date=warranty_end_date)
 
 @app.route('/view_security_incidents', methods=['GET'])
+@login_required
 def view_security_incidents():
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         
@@ -237,6 +300,7 @@ def view_security_incidents():
                            report_date=report_date, description=description, resolve_date=resolve_date)
 
 @app.route('/maintenance_contracts', methods=['GET', 'POST'])
+@login_required
 def maintenance_contracts():
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         
@@ -309,6 +373,7 @@ def maintenance_contracts():
 
 # Add Maintenance Contract
 @app.route('/add_maintenance_contract', methods=['GET', 'POST'])
+@login_required
 def add_maintenance_contract():
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         if request.method == 'POST':
@@ -338,6 +403,7 @@ def add_maintenance_contract():
 
 # Edit Maintenance Contract
 @app.route('/edit_maintenance_contract/<int:cid>', methods=['GET', 'POST'])
+@login_required
 def edit_maintenance_contract(cid):
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
         
@@ -368,6 +434,7 @@ def edit_maintenance_contract(cid):
 
     return render_template('edit_maintenance_contract.html', contract=contract, equipment=equipment, vendors=vendors)
 @app.route('/delete_maintenance_contract/<int:cid>', methods=['POST'])
+@login_required
 def delete_maintenance_contract(cid):
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
       
