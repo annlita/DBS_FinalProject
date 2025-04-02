@@ -181,7 +181,7 @@ def edit_equipment(eid):
             warranty_end_date = request.form['warranty_end_date']
             
             cursor.execute('''
-                UPDATE Equipment SET name=%s, type=%s, location=%s, status=%s, VID=%s, purchase_date=%s, warranty_end_date=%s
+                UPDATE equipment SET name=%s, type=%s, location=%s, status=%s, VID=%s, purchase_date=%s, warranty_end_date=%s
                 WHERE EID=%s
             ''', (name, type, location, status, vid, purchase_date, warranty_end_date, eid))
             mysql.connection.commit()
