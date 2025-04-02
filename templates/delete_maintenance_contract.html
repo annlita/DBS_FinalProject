@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Maintenance Contract</title>
+</head>
+<body>
+
+<h1>Delete Maintenance Contract</h1>
+
+<p>Are you sure you want to delete this maintenance contract?</p>
+
+<p><strong>Contract ID:</strong> {{ contract.ContractID }}</p>
+<p><strong>Equipment ID:</strong> {{ contract.EquipmentID }}</p>
+<p><strong>Provider:</strong> {{ contract.Provider }}</p>
+<p><strong>Start Date:</strong> {{ contract.StartDate }}</p>
+<p><strong>End Date:</strong> {{ contract.EndDate }}</p>
+
+<form method="POST" action="{{ url_for('delete.confirm_delete_maintenance', contract_id=contract.ContractID) }}">
+    <button type="submit">Delete Contract</button>
+</form>
+
+<a href="{{ url_for('manage_maintenance_contracts') }}">Cancel</a>
+
+</body>
+</html>
