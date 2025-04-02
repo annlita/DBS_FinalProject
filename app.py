@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 import MySQLdb.cursors
@@ -13,9 +12,7 @@ import pymysql
 from config import Config  # Import config settings
 
 app = Flask(__name__)
-app.secret_key = 'abccompanyDB'
 
-bcrypt = Bcrypt(app)
 
 # Load MySQL settings from config.py
 app.config['MYSQL_HOST'] = Config.MYSQL_HOST
@@ -63,7 +60,7 @@ def login():
             cursor.execute("SELECT * FROM user WHERE email = %s", (email,))
             user = cursor.fetchone()
 
-            if user and bcrypt.check_password_hash(user['password'], password):
+            if user and user['password'] == password:  # Check password without hash
                 login_user(User(user['UID'], user['email'], user['role']))
                 flash('Login successful!', 'success')
                 return redirect(url_for('dashboard'))
