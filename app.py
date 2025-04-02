@@ -5,11 +5,27 @@ from flask_sqlalchemy import SQLAlchemy
 import config
 import MySQLdb.cursors
 
+#mysql = MySQL(app)
+
+import pymysql
+
 app = Flask(__name__)
 
-# MySQL configuration
+# Load configuration
 app.config.from_object(config.Config)
-mysql = MySQL(app)
+
+# MySQL configuration - Replace with Aiven details
+db_config = {
+    "host": "mysql-21c16d9f-dbsfinalproject.g.aivencloud.com",
+    "user": "avnadmin",
+    "password": "AVNS_aiPLxh2e4QRnMCGDMRS",
+    "database": "defaultdb",
+    "port": 11810  # Default Aiven MySQL port
+}
+
+# Function to get database connection
+def get_db_connection():
+    return pymysql.connect(**db_config, cursorclass=pymysql.cursors.DictCursor)
 
 # Flask-Mail setup (assuming you're using Flask-Mail for email sending)
 
