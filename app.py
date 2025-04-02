@@ -18,7 +18,7 @@ app.config['MYSQL_USER'] = Config.MYSQL_USER
 app.config['MYSQL_PASSWORD'] = Config.MYSQL_PASSWORD
 app.config['MYSQL_DB'] = Config.MYSQL_DB
 app.config['MYSQL_PORT'] = 11810
-app.config['MYSQL_CONNECT_TIMEOUT'] = 10
+app.config['MYSQL_CONNECT_TIMEOUT'] = 20
 
 
 mysql = MySQL(app)
@@ -152,7 +152,7 @@ def view_equipment():
         warranty_end_date = request.args.get('warranty_end_date', '').strip()
 
         # Base query
-        query = "SELECT * FROM Equipment WHERE 1=1"
+        query = "SELECT * FROM equipment WHERE 1=1"
         params = []
 
         # Add filters if provided
