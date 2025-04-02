@@ -12,6 +12,7 @@ import pymysql
 from config import Config  # Import config settings
 
 app = Flask(__name__)
+app.secret_key = 'NetGuard_SK'
 
 
 # Load MySQL settings from config.py
