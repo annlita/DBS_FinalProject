@@ -47,7 +47,7 @@ def manage_equipment():
         warranty_end_date = request.args.get('warranty_end_date', '').strip()
 
         # Base query
-        query = "SELECT * FROM Equipment WHERE 1=1"
+        query = "SELECT * FROM equipment WHERE 1=1"
         params = []
 
         # Add filters if provided
@@ -79,7 +79,7 @@ def manage_equipment():
         if request.method == 'POST' and 'delete' in request.form:
             # Handle equipment deletion
             eid = request.form['eid']
-            cursor.execute('DELETE FROM Equipment WHERE EID=%s', (eid,))
+            cursor.execute('DELETE FROM equipment WHERE EID=%s', (eid,))
             mysql.connection.commit()
             return redirect(url_for('manage_equipment'))
 
@@ -102,7 +102,7 @@ def add_equipment():
             
             
             cursor.execute('''
-                INSERT INTO Equipment (name, type, location, status, VID, purchase_date, warranty_end_date)
+                INSERT INTO equipment (name, type, location, status, VID, purchase_date, warranty_end_date)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             ''', (name, type, location, status, vid, purchase_date, warranty_end_date))
             mysql.connection.commit()
@@ -132,7 +132,7 @@ def edit_equipment(eid):
             mysql.connection.commit()
             return redirect(url_for('manage_equipment'))
 
-        cursor.execute('SELECT * FROM Equipment WHERE EID=%s', (eid,))
+        cursor.execute('SELECT * FROM equipment WHERE EID=%s', (eid,))
         equipment = cursor.fetchone()
     return render_template('edit_equipment.html', equipment=equipment)
 
@@ -200,7 +200,7 @@ def view_security_incidents():
         resolve_date = request.args.get('resolve_date', '').strip()
 
         # Base query
-        query = "SELECT * FROM SecurityIncident WHERE 1=1"
+        query = "SELECT * FROM securityincident WHERE 1=1"
         params = []
 
         # Add filters if provided
@@ -253,53 +253,53 @@ def maintenance_contracts():
 
         query = '''
             SELECT 
-                MaintenanceContract.CID, 
-                MaintenanceContract.start_date, 
-                MaintenanceContract.end_date, 
-                MaintenanceContract.service_level, 
-                MaintenanceContract.EID, 
-                MaintenanceContract.VID,
-                Equipment.name AS equipment_name, 
-                Equipment.type AS equipment_type, 
-                Vendor.name AS vendor_name, 
-                Vendor.contact_person AS vendor_contact
+                maintenancecontract.CID, 
+                maintenancecontract.start_date, 
+                maintenancecontract.end_date, 
+                maintenancecontract.service_level, 
+                maintenancecontract.EID, 
+                maintenancecontract.VID,
+                equipment.name AS equipment_name, 
+                equipment.type AS equipment_type, 
+                vendor.name AS vendor_name, 
+                vendor.contact_person AS vendor_contact
             FROM 
-                MaintenanceContract
+                maintenancecontract
             JOIN 
-                Equipment ON MaintenanceContract.EID = Equipment.EID
+                equipment ON maintenancecontract.EID = equipment.EID
             JOIN 
-                Vendor ON MaintenanceContract.VID = Vendor.VID
+                vendor ON maintenancecontract.VID = vendor.VID
             WHERE 1=1
         '''
         params = []
 
         # Apply filters if they exist
         if cid:
-            query += " AND MaintenanceContract.CID = %s"
+            query += " AND maintenancecontract.CID = %s"
             params.append(cid)
         if vid:
-            query += " AND MaintenanceContract.VID = %s"
+            query += " AND maintenancecontract.VID = %s"
             params.append(vid)
         if vendor_name:
-            query += " AND MaintenanceContract.vendor_name = %s"
+            query += " AND maintenancecontract.vendor_name = %s"
             params.append(f"%{vendor_name}%")
         if eid:
-            query += " AND MaintenanceContract.EID = %s"
+            query += " AND maintenancecontract.EID = %s"
             params.append(eid)
         if equipment_name:
-            query += " AND MaintenanceContract.equipment_name = %s"
+            query += " AND maintenancecontract.equipment_name = %s"
             params.append(f"%{equipment_name}%")
         if service_level:
-            query += " AND MaintenanceContract.service_level LIKE %s"
+            query += " AND maintenancecontract.service_level LIKE %s"
             params.append(f"%{service_level}%")
         if equipment_type:
-            query += " AND Equipment.type LIKE %s"
+            query += " AND equipment.type LIKE %s"
             params.append(f"%{equipment_type}%")
         if start_date:
-            query += " AND MaintenanceContract.start_date = %s"
+            query += " AND maintenancecontract.start_date = %s"
             params.append(start_date)
         if end_date:
-            query += " AND MaintenanceContract.end_date = %s"
+            query += " AND maintenancecontract.end_date = %s"
             params.append(end_date)
 
         cursor.execute(query, tuple(params))
@@ -320,17 +320,17 @@ def add_maintenance_contract():
             
             
             cursor.execute('''
-                INSERT INTO MaintenanceContract (EID, VID, service_level, start_date, end_date)
+                INSERT INTO maintenancecontract (EID, VID, service_level, start_date, end_date)
                 VALUES (%s, %s, %s, %s, %s)
             ''', (eid, vid, service_level, start_date, end_date))
             mysql.connection.commit()
             return redirect(url_for('maintenance_contracts'))
         
         # Fetch equipment and vendor data for dropdowns in the form
-        cursor.execute("SELECT * FROM Equipment")
+        cursor.execute("SELECT * FROM equipment")
         equipment = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM Vendor")
+        cursor.execute("SELECT * FROM vendor")
         vendors = cursor.fetchall()
 
     return render_template('add_maintenance_contract.html')
@@ -350,20 +350,20 @@ def edit_maintenance_contract(cid):
             end_date = request.form['end_date']
             
             cursor.execute('''
-                UPDATE MaintenanceContract SET EID=%s, VID=%s, service_level=%s, start_date=%s, end_date=%s
+                UPDATE maintenancecontract SET EID=%s, VID=%s, service_level=%s, start_date=%s, end_date=%s
                 WHERE CID=%s
             ''', (eid, vid, service_level, start_date, end_date, cid))
             mysql.connection.commit()
             return redirect(url_for('maintenance_contracts'))
 
-        cursor.execute('SELECT * FROM MaintenanceContract WHERE CID=%s', (cid,))
+        cursor.execute('SELECT * FROM maintenancecontract WHERE CID=%s', (cid,))
         contract = cursor.fetchone()
 
         # Fetch equipment and vendor data for dropdowns in the form
-        cursor.execute("SELECT * FROM Equipment")
+        cursor.execute("SELECT * FROM equipment")
         equipment = cursor.fetchall()
 
-        cursor.execute("SELECT * FROM Vendor")
+        cursor.execute("SELECT * FROM vendor")
         vendors = cursor.fetchall()
 
     return render_template('edit_maintenance_contract.html', contract=contract, equipment=equipment, vendors=vendors)
@@ -371,7 +371,7 @@ def edit_maintenance_contract(cid):
 def delete_maintenance_contract(cid):
     with mysql.connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
       
-        cursor.execute('DELETE FROM MaintenanceContract WHERE CID=%s', (cid,))
+        cursor.execute('DELETE FROM maintenancecontract WHERE CID=%s', (cid,))
         mysql.connection.commit()
         return redirect(url_for('maintenance_contracts'))
 
