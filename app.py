@@ -4,7 +4,6 @@ from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 import MySQLdb.cursors
 
-#mysql = MySQL(app)
 
 import pymysql
 
@@ -19,7 +18,8 @@ app.config['MYSQL_USER'] = Config.MYSQL_USER
 app.config['MYSQL_PASSWORD'] = Config.MYSQL_PASSWORD
 app.config['MYSQL_DB'] = Config.MYSQL_DB
 
-
+mysql = MySQL(app)
+cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
 # Flask-Mail setup (assuming you're using Flask-Mail for email sending)
 
