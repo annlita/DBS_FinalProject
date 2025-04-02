@@ -94,7 +94,7 @@
         <h2>Login</h2>
 
         {% for message, category in get_flashed_messages(with_categories=True) %}
-            <p class="message {{ 'error' if category == 'danger' else 'success' }}"> Welcome to NetGuard </p>
+            <p class="message {{ 'error' if category == 'danger' else 'success' }}"> "Welcome to NetGuard" </p>
         {% endfor %}
 
         <form method="POST">

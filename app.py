@@ -64,7 +64,7 @@ def login():
             if user and user['password'] == password:  # Check password without hash
                 login_user(User(user['UID'], user['email'], user['role']))
                 flash('Login successful!', 'success')
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('index'))
             else:
                 flash('Invalid email or password', 'danger')
 
@@ -77,15 +77,11 @@ def logout():
     flash('Logged out successfully', 'success')
     return redirect(url_for('login'))
 
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html', user=current_user)
 
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')  # Render the first page from index.html
+    return render_template('index.html', user=current_user)  # Render the first page from index.html
 
 # Manage Equipment - List all equipment with filters
 @app.route('/manage_equipment', methods=['GET', 'POST'])
